@@ -7,6 +7,7 @@ import { Navbar, type Tab } from "@/components/Navbar";
 import { Marketplace } from "@/components/Marketplace";
 import { MyAssets } from "@/components/MyAssets";
 import { Governance } from "@/components/Governance";
+import { ListProperty } from "@/components/ListProperty";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -42,6 +43,7 @@ function Index() {
               {tab === "marketplace" && <Marketplace />}
               {tab === "assets" && <MyAssets />}
               {tab === "governance" && <Governance />}
+              {tab === "list" && <ListProperty goToTab={setTab} />}
             </motion.div>
           </AnimatePresence>
         </main>
