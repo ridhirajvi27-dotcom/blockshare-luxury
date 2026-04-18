@@ -2,12 +2,13 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { motion } from "motion/react";
 import { Building2 } from "lucide-react";
 
-export type Tab = "marketplace" | "assets" | "governance";
+export type Tab = "marketplace" | "assets" | "governance" | "list";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "marketplace", label: "Marketplace" },
   { id: "assets", label: "My Assets" },
   { id: "governance", label: "Governance" },
+  { id: "list", label: "List Property" },
 ];
 
 export function Navbar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {

@@ -1,17 +1,22 @@
+/**
+ * Card for a single on-chain building.
+ */
 import { motion } from "motion/react";
 import { MapPin, ArrowUpRight, Coins } from "lucide-react";
-import type { Building } from "@/lib/data";
+import type { ChainBuilding } from "@/hooks/useBuildings";
+import { getBuildingImages } from "@/lib/buildingMeta";
 
 export function BuildingCard({
   building,
   onSelect,
   index,
 }: {
-  building: Building;
+  building: ChainBuilding;
   onSelect: () => void;
   index: number;
 }) {
-  const soldPct = (building.soldTokens / building.totalTokens) * 100;
+  const image = getBuildingImages(building.id)[0];
+  const ownerShort = `${building.owner.slice(0, 6)}…${building.owner.slice(-4)}`;
 
   return (
     <motion.article
@@ -23,14 +28,12 @@ export function BuildingCard({
       className="group relative cursor-pointer"
       onClick={onSelect}
     >
-      {/* Glow */}
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-cyan-400/0 via-cyan-400/0 to-blue-600/0 opacity-0 blur-xl transition-opacity duration-500 group-hover:from-cyan-400/30 group-hover:to-blue-600/30 group-hover:opacity-100" />
 
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/80 backdrop-blur-sm transition-all duration-500 group-hover:border-cyan-400/40">
-        {/* Image */}
         <div className="relative aspect-[4/3] overflow-hidden">
           <motion.img
-            src={building.image}
+            src={image}
             alt={building.name}
             loading="lazy"
             className="h-full w-full object-cover"
@@ -42,53 +45,58 @@ export function BuildingCard({
 
           <div className="absolute top-4 left-4 flex items-center gap-1.5 rounded-full glass px-3 py-1 text-xs">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-white/90">Live</span>
+            <span className="text-white/90">On-chain</span>
           </div>
 
           <div className="absolute top-4 right-4 rounded-full glass px-3 py-1 text-xs font-medium text-cyan-300">
-            {soldPct.toFixed(0)}% funded
+            {building.soldPct.toFixed(0)}% funded
           </div>
 
           <div className="absolute bottom-4 left-4 right-4">
-            <h3 className="font-display text-2xl font-semibold text-white">{building.name}</h3>
+            <h3 className="font-display text-2xl font-semibold text-white">
+              {building.name}
+            </h3>
             <div className="mt-1 flex items-center gap-1 text-sm text-zinc-300">
               <MapPin className="h-3.5 w-3.5" />
-              {building.location}
+              <span className="font-mono text-xs">{ownerShort}</span>
             </div>
           </div>
         </div>
 
-        {/* Body */}
         <div className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <div className="text-[11px] uppercase tracking-wider text-zinc-500">Total Value</div>
+              <div className="text-[11px] uppercase tracking-wider text-zinc-500">
+                Total Value
+              </div>
               <div className="mt-1 font-display text-lg font-semibold text-white">
-                ${(building.totalValue / 1_000_000).toFixed(2)}M
+                {Number(building.priceEth).toFixed(2)} ETH
               </div>
             </div>
             <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3">
-              <div className="text-[11px] uppercase tracking-wider text-zinc-500">Token Price</div>
+              <div className="text-[11px] uppercase tracking-wider text-zinc-500">
+                Token Price
+              </div>
               <div className="mt-1 flex items-center gap-1 font-display text-lg font-semibold text-cyan-300">
-                <Coins className="h-4 w-4" />${building.tokenPrice}
+                <Coins className="h-4 w-4" />
+                {Number(building.tokenPriceEth).toFixed(4)}
               </div>
             </div>
           </div>
 
-          {/* Progress bar */}
           <div>
             <div className="h-1 overflow-hidden rounded-full bg-white/5">
               <motion.div
                 className="h-full bg-gradient-to-r from-cyan-400 to-blue-500"
                 initial={{ width: 0 }}
-                whileInView={{ width: `${soldPct}%` }}
+                whileInView={{ width: `${building.soldPct}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 1.2, delay: 0.3 + index * 0.08 }}
               />
             </div>
             <div className="mt-2 flex justify-between text-[11px] text-zinc-500">
-              <span>{building.soldTokens.toLocaleString()} tokens sold</span>
-              <span>{building.totalTokens.toLocaleString()} total</span>
+              <span>{building.tokensSold.toString()} tokens sold</span>
+              <span>{building.totTokens.toString()} total</span>
             </div>
           </div>
 
