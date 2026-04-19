@@ -51,6 +51,9 @@ export function BuildingModal({
   const [mode, setMode] = useState<Mode>("buy");
   const [qty, setQty] = useState(1);
   const [seedEth, setSeedEth] = useState("");
+  const [flatBHK, setFlatBHK] = useState("");
+  const [flatCount, setFlatCount] = useState("");
+  const [flatRentEth, setFlatRentEth] = useState("");
   const [imgIdx, setImgIdx] = useState(0);
   const [copied, setCopied] = useState(false);
   const { address, isConnected } = useAccount();
@@ -280,6 +283,40 @@ export function BuildingModal({
     }
   };
 
+  const handleAddFlat = () => {
+    if (!isConnected || !building) return;
+    const bhk = parseInt(flatBHK);
+    const count = parseInt(flatCount);
+    const rent = parseFloat(flatRentEth);
+    if (!bhk || !count || !rent) return toast.error("Enter valid flat details");
+    try {
+      writeContract({
+        address: CONTRACTS.blockShare,
+        abi: BLOCKSHARE_ABI,
+        functionName: "addFlat",
+        args: [BigInt(building.id), BigInt(bhk), BigInt(count), parseEther(flatRentEth)],
+      });
+      toast.info(`Adding ${bhk}BHK flat to BlockShare…`);
+    } catch (e) {
+      toast.error("Add flat failed", { description: (e as Error).message });
+    }
+  };
+
+  const handleActivateRent = (numBHK: number, rentWei: bigint) => {
+    if (!isConnected || !building) return;
+    try {
+      writeContract({
+        address: CONTRACTS.rent,
+        abi: RENT_ABI,
+        functionName: "setRent",
+        args: [BigInt(building.id), BigInt(numBHK), rentWei],
+      });
+      toast.info(`Activating rent collection for ${numBHK}BHK…`);
+    } catch (e) {
+      toast.error("Activate rent failed", { description: (e as Error).message });
+    }
+  };
+
   const copyOwner = async () => {
     if (!building) return;
     await navigator.clipboard.writeText(building.owner);
@@ -482,8 +519,49 @@ export function BuildingModal({
                     </div>
                   )}
 
+                  {/* Owner: Add Flat */}
+                  {isOwner && (
+                    <div className="rounded-2xl border border-cyan-400/30 bg-cyan-400/[0.05] p-4 mt-4">
+                      <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-cyan-300">
+                        <Plus className="h-3.5 w-3.5" />
+                        Add Rental Flat (owner only)
+                      </div>
+                      <div className="mt-3 grid grid-cols-3 gap-2">
+                        <input
+                          type="number"
+                          placeholder="BHK (e.g. 2)"
+                          value={flatBHK}
+                          onChange={(e) => setFlatBHK(e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/60"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Total units"
+                          value={flatCount}
+                          onChange={(e) => setFlatCount(e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/60"
+                        />
+                        <input
+                          type="number"
+                          step="0.001"
+                          placeholder="Rent (ETH)"
+                          value={flatRentEth}
+                          onChange={(e) => setFlatRentEth(e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/60"
+                        />
+                      </div>
+                      <button
+                        onClick={handleAddFlat}
+                        disabled={isPending || isConfirming}
+                        className="mt-3 w-full rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-black hover:bg-cyan-300 disabled:opacity-50"
+                      >
+                        Add Flat Config
+                      </button>
+                    </div>
+                  )}
+
                   {/* Flats */}
-                  <div>
+                  <div className="mt-4">
                     <h3 className="font-display text-xl font-semibold mb-3 flex items-center gap-2">
                       <Home className="h-5 w-5 text-cyan-400" />
                       Rental Flats
@@ -525,13 +603,30 @@ export function BuildingModal({
                               <div className="text-cyan-300 font-mono text-sm mb-3">
                                 {Number(formatEther(payable)).toFixed(5)} ETH/mo
                               </div>
-                              <button
-                                onClick={() => handlePayRent(flat.numBHK, payable)}
-                                disabled={isPending || isConfirming || !active}
-                                className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-white transition-all hover:bg-cyan-400/10 hover:border-cyan-400/40 disabled:opacity-50"
-                              >
-                                {active ? "Pay Rent Now" : "Inactive"}
-                              </button>
+                              {active ? (
+                                <button
+                                  onClick={() => handlePayRent(flat.numBHK, payable)}
+                                  disabled={isPending || isConfirming || !active}
+                                  className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-white transition-all hover:bg-cyan-400/10 hover:border-cyan-400/40 disabled:opacity-50"
+                                >
+                                  Pay Rent Now
+                                </button>
+                              ) : isOwner ? (
+                                <button
+                                  onClick={() => handleActivateRent(flat.numBHK, payable)}
+                                  disabled={isPending || isConfirming}
+                                  className="w-full rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-200 transition-all hover:bg-amber-400/20 disabled:opacity-50"
+                                >
+                                  Activate Rent (Rent.sol)
+                                </button>
+                              ) : (
+                                <button
+                                  disabled
+                                  className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-zinc-500 opacity-50 cursor-not-allowed"
+                                >
+                                  Rent Inactive
+                                </button>
+                              )}
                             </motion.div>
                           );
                         })}

@@ -143,7 +143,9 @@ export function Admin() {
     ownerAddr &&
     address &&
     String(ownerAddr).toLowerCase() === address.toLowerCase();
+  
 
+    
   const approve = (id: number) => {
     setActingId(id);
     setActionType("approve");
