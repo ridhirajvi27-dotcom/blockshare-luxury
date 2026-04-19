@@ -2,6 +2,10 @@
 
 BlockShare is a **Web3-powered real estate platform** that enables users to invest in **fractional property ownership**, earn rental income, and participate in governance — all fully **on-chain**.
 
+## Demo Link
+https://www.loom.com/share/9d3326f17e2442acb4d343f9ac9a9ee9
+### Full Working
+https://www.loom.com/share/a316b56c270f4239bd184ba40b52b45f
 ---
 
 ## 🚀 Core Idea
