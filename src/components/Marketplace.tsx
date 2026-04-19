@@ -7,7 +7,7 @@ import { Sparkles, Loader2, Inbox } from "lucide-react";
 import { BuildingCard } from "./BuildingCard";
 import { BuildingModal } from "./BuildingModal";
 import { useBuildings, type ChainBuilding } from "@/hooks/useBuildings";
-import heroBg from "@/assets/hero-bg.jpg";
+import { AnimatedCityBg } from "./AnimatedCityBg";
 
 export function Marketplace() {
   const [selected, setSelected] = useState<ChainBuilding | null>(null);
@@ -22,18 +22,8 @@ export function Marketplace() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-28">
-        <div
-          className="absolute inset-0 -z-10 opacity-50"
-          style={{
-            backgroundImage: `url(${heroBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-zinc-950/60 to-zinc-950" />
-        <div className="absolute inset-0 -z-10 grid-bg opacity-30" />
-        <div className="absolute top-20 left-1/4 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl animate-pulse-glow" />
-        <div className="absolute top-40 right-1/4 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl animate-pulse-glow" />
+        <AnimatedCityBg />
+        <div className="absolute inset-0 -z-10 grid-bg opacity-20" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
