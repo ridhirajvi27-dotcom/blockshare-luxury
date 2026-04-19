@@ -58,35 +58,42 @@ export function useBuildings() {
     return results
       .map((r, i) => {
         if (r.status !== "success" || !r.result) return null;
+        
+        // Struct from BlockShare.sol: 
+        // uint256 id; address owner; string description; uint256 price; uint256 totTokens; uint256 ethReserves; uint256 tokenReserves;
         const [
           id,
           owner,
-          name,
           description,
           price,
-          tokenEquity,
-          tokenPrice,
           totTokens,
-          tokensSold,
           ethReserves,
           tokenReserves,
         ] = r.result as readonly [
           bigint,
           `0x${string}`,
           string,
-          string,
-          bigint,
-          bigint,
-          bigint,
           bigint,
           bigint,
           bigint,
           bigint,
         ];
+        
         const hasPool = ethReserves > 0n && tokenReserves > 0n;
         const spotPriceEth = hasPool
           ? Number(formatEther(ethReserves)) / Number(tokenReserves)
-          : Number(formatEther(tokenPrice));
+          : Number(formatEther(price)) / Math.max(1, Number(totTokens));
+
+        const tokenPrice = price / (totTokens > 0n ? totTokens : 1n);
+
+        // Name is removed from struct, infer from description
+        const name = description.length > 20 ? description.substring(0, 20) + "..." : description || `Property #${Number(id) || i + 1}`;
+        
+        // Equity is derived
+        const tokenEquity = totTokens > 0n ? 1_000_000n / totTokens : 0n;
+        // Tokens sold is extracted from reserves vs total
+        const tokensSold = hasPool && totTokens > 0n ? totTokens - tokenReserves : 0n;
+
         return {
           id: Number(id) || i + 1,
           owner,
@@ -96,7 +103,7 @@ export function useBuildings() {
           priceEth: formatEther(price),
           tokenEquity,
           tokenPriceWei: tokenPrice,
-          tokenPriceEth: formatEther(tokenPrice),
+          tokenPriceEth: String(spotPriceEth),
           totTokens,
           tokensSold,
           ethReservesWei: ethReserves,
