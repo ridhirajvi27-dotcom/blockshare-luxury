@@ -111,6 +111,40 @@ Traditional real estate is:
 
 ---
 
+## 🌐 Why This is Dynamic
+
+BlockShare is not a static marketplace — it is **fully dynamic**:
+
+### 🔁 Dynamic Ownership
+
+* Ownership changes in real-time via token trading
+
+### 💰 Dynamic Pricing
+
+* Token price changes based on:
+
+  * ETH reserves
+  * demand (AMM logic)
+
+### 🏢 Dynamic Property Structure
+
+* Different buildings → different:
+
+  * flat types
+  * rent values
+  * configurations
+
+### 🗳️ Dynamic Governance
+
+* Decisions are not fixed
+* Investors control outcomes through voting
+
+### 📊 Dynamic Income Distribution
+
+* Rent is calculated and distributed **on-chain in real-time**
+
+---
+
 ## ⚙️ Smart Contract Architecture
 
 ### 📦 Contracts Overview
@@ -148,39 +182,7 @@ Traditional real estate is:
 
 ---
 
-## 🌐 Why This is Dynamic
 
-BlockShare is not a static marketplace — it is **fully dynamic**:
-
-### 🔁 Dynamic Ownership
-
-* Ownership changes in real-time via token trading
-
-### 💰 Dynamic Pricing
-
-* Token price changes based on:
-
-  * ETH reserves
-  * demand (AMM logic)
-
-### 🏢 Dynamic Property Structure
-
-* Different buildings → different:
-
-  * flat types
-  * rent values
-  * configurations
-
-### 🗳️ Dynamic Governance
-
-* Decisions are not fixed
-* Investors control outcomes through voting
-
-### 📊 Dynamic Income Distribution
-
-* Rent is calculated and distributed **on-chain in real-time**
-
----
 
 ## 🛠️ Tech Stack
 
