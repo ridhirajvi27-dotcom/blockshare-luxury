@@ -16,7 +16,7 @@ export const wagmiConfig = getDefaultConfig({
  */
 export const CONTRACTS = {
   blockShare: "0x85F9FeaF11b241261f2B7097bd9cD6B9e4DF8c59" as `0x${string}`,
-  rent: " 0xf79cDE88CBbF47681BE79A2ad319c4De8C6389b4" as `0x${string}`,
+  rent: "0xf79cDE88CBbF47681BE79A2ad319c4De8C6389b4" as `0x${string}`,
   proposals: "0x68Fe3fb86BA3bc36C466f9FF6D16a71873716F27" as `0x${string}`,
 };
 
