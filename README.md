@@ -8,7 +8,6 @@ Welcome to **BlockShare Luxury**—the ultimate decentralized Real Estate and pr
 * **Built-in AMM DEX:** Buy or sell real estate tokens instantly via the smart contract's automated market maker.
 * **Property Governance:** Once you hold building tokens, you become part of an autonomous DAO. Propose, vote, and execute operational changes for strict property management.
 * **Automated Rental Yields:** As tenants actively pay their monthly rent, the protocol autonomously mathematically distributes passive income directly to thousands of token holders based on exact ownership percentage. 
-* **Cinematic Experience:** Envelops the user in a breathtaking cyberpunk neon intro splash screen powered by `framer-motion` for a premium, high-luxury aesthetic.
 
 ## 🛠️ Tech Stack
 
