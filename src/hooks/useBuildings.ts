@@ -1,6 +1,6 @@
 /**
  * Reads BuildingCount + every building struct from BlockShare.
- * Returns parsed list with on-chain values converted from wei.
+ * The BuildingInfo struct now has 11 fields (added ethReserves + tokenReserves).
  */
 import { useMemo } from "react";
 import { useReadContract, useReadContracts } from "wagmi";
@@ -19,6 +19,11 @@ export type ChainBuilding = {
   tokenPriceEth: string;
   totTokens: bigint;
   tokensSold: bigint;
+  ethReservesWei: bigint;
+  tokenReserves: bigint;
+  hasPool: boolean;
+  /** AMM spot price (ETH per token) — based on reserves. */
+  spotPriceEth: number;
   soldPct: number;
 };
 
@@ -63,6 +68,8 @@ export function useBuildings() {
           tokenPrice,
           totTokens,
           tokensSold,
+          ethReserves,
+          tokenReserves,
         ] = r.result as readonly [
           bigint,
           `0x${string}`,
@@ -73,7 +80,13 @@ export function useBuildings() {
           bigint,
           bigint,
           bigint,
+          bigint,
+          bigint,
         ];
+        const hasPool = ethReserves > 0n && tokenReserves > 0n;
+        const spotPriceEth = hasPool
+          ? Number(formatEther(ethReserves)) / Number(tokenReserves)
+          : Number(formatEther(tokenPrice));
         return {
           id: Number(id) || i + 1,
           owner,
@@ -86,6 +99,10 @@ export function useBuildings() {
           tokenPriceEth: formatEther(tokenPrice),
           totTokens,
           tokensSold,
+          ethReservesWei: ethReserves,
+          tokenReserves,
+          hasPool,
+          spotPriceEth,
           soldPct:
             totTokens > 0n ? Number((tokensSold * 10000n) / totTokens) / 100 : 0,
         } as ChainBuilding;

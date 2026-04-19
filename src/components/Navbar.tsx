@@ -2,13 +2,14 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { motion } from "motion/react";
 import { Building2 } from "lucide-react";
 
-export type Tab = "marketplace" | "assets" | "governance" | "list";
+export type Tab = "marketplace" | "assets" | "governance" | "list" | "admin";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "marketplace", label: "Marketplace" },
   { id: "assets", label: "My Assets" },
   { id: "governance", label: "Governance" },
   { id: "list", label: "List Property" },
+  { id: "admin", label: "Admin" },
 ];
 
 export function Navbar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
@@ -39,7 +40,7 @@ export function Navbar({ active, onChange }: { active: Tab; onChange: (t: Tab) =
               <button
                 key={tab.id}
                 onClick={() => onChange(tab.id)}
-                className="relative rounded-full px-5 py-2 text-sm font-medium transition-colors"
+                className="relative rounded-full px-4 py-2 text-sm font-medium transition-colors"
               >
                 {active === tab.id && (
                   <motion.div
@@ -69,12 +70,12 @@ export function Navbar({ active, onChange }: { active: Tab; onChange: (t: Tab) =
         </div>
 
         {/* Mobile tabs */}
-        <nav className="md:hidden flex justify-center gap-1 px-4 pb-3">
+        <nav className="md:hidden flex justify-center gap-1 px-2 pb-3 overflow-x-auto">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => onChange(tab.id)}
-              className={`flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+              className={`flex-shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                 active === tab.id
                   ? "bg-gradient-to-r from-cyan-500/20 to-blue-600/20 border border-cyan-400/30 text-white"
                   : "text-zinc-400 border border-white/5"
