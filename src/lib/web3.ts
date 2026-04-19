@@ -3,7 +3,6 @@ import { sepolia } from "wagmi/chains";
 
 export const wagmiConfig = getDefaultConfig({
   appName: "BlockShare",
-  // Public WalletConnect demo project ID — replace with your own for production.
   projectId: "3a8170812b534d0ff9d794f19a901d64",
   chains: [sepolia],
   ssr: false,
@@ -11,10 +10,9 @@ export const wagmiConfig = getDefaultConfig({
 
 /**
  * 🚧 PLACEHOLDER ADDRESSES — replace after deployment.
- * The same address is used for BlockShare / Rent / ProposalManager because
- * Rent and ProposalManager both inherit from BlockShare in your contracts,
- * so once deployed as a single contract instance they share storage. If you
- * deploy them separately, override these with the individual addresses.
+ * BlockShare and ProposalManager share storage (ProposalManager inherits BlockShare),
+ * so deploy ProposalManager and use its address for both.
+ * Rent is a separate contract that takes BlockShare's address in its constructor.
  */
 export const CONTRACTS = {
   blockShare: "0x0000000000000000000000000000000000000000" as `0x${string}`,
@@ -22,11 +20,11 @@ export const CONTRACTS = {
   proposals: "0x0000000000000000000000000000000000000000" as `0x${string}`,
 };
 
-/** Fee required to create a new building (from AddBuilding). */
+/** Fee required to submit a building request. */
 export const ADD_BUILDING_FEE_ETH = "1";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BlockShare ABI
+// BlockShare ABI (request/approve flow + AMM swap)
 // ─────────────────────────────────────────────────────────────────────────────
 export const BLOCKSHARE_ABI = [
   {
@@ -35,6 +33,20 @@ export const BLOCKSHARE_ABI = [
     stateMutability: "view",
     inputs: [],
     outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "requestCount",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "owner",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
   },
   {
     type: "function",
@@ -51,11 +63,29 @@ export const BLOCKSHARE_ABI = [
       { name: "tokenPrice", type: "uint256" },
       { name: "totTokens", type: "uint256" },
       { name: "tokensSold", type: "uint256" },
+      { name: "ethReserves", type: "uint256" },
+      { name: "tokenReserves", type: "uint256" },
     ],
   },
   {
     type: "function",
-    name: "AddBuilding",
+    name: "requests",
+    stateMutability: "view",
+    inputs: [{ name: "", type: "uint256" }],
+    outputs: [
+      { name: "requester", type: "address" },
+      { name: "name", type: "string" },
+      { name: "description", type: "string" },
+      { name: "price", type: "uint256" },
+      { name: "tokenEquity", type: "uint256" },
+      { name: "valueSent", type: "uint256" },
+      { name: "approved", type: "bool" },
+      { name: "rejected", type: "bool" },
+    ],
+  },
+  {
+    type: "function",
+    name: "requestBuilding",
     stateMutability: "payable",
     inputs: [
       { name: "_name", type: "string" },
@@ -64,6 +94,20 @@ export const BLOCKSHARE_ABI = [
       { name: "_tokenEquity", type: "uint256" },
     ],
     outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "approveBuilding",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "requestId", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "rejectBuilding",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "requestId", type: "uint256" }],
+    outputs: [],
   },
   {
     type: "function",
@@ -94,11 +138,29 @@ export const BLOCKSHARE_ABI = [
   },
   {
     type: "function",
-    name: "mint",
+    name: "noOfFlatsByBHK",
+    stateMutability: "view",
+    inputs: [
+      { name: "", type: "uint256" },
+      { name: "", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "seedLiquidity",
+    stateMutability: "payable",
+    inputs: [{ name: "_id", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "swap",
     stateMutability: "payable",
     inputs: [
-      { name: "id", type: "uint256" },
-      { name: "amount", type: "uint256" },
+      { name: "_id", type: "uint256" },
+      { name: "_tokenAmountIn", type: "uint256" },
+      { name: "_isBuy", type: "bool" },
     ],
     outputs: [],
   },
@@ -123,6 +185,26 @@ export const BLOCKSHARE_ABI = [
     outputs: [],
   },
   {
+    type: "function",
+    name: "setApprovalForAll",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "operator", type: "address" },
+      { name: "approved", type: "bool" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "isApprovedForAll",
+    stateMutability: "view",
+    inputs: [
+      { name: "account", type: "address" },
+      { name: "operator", type: "address" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
     type: "event",
     name: "BuildingAdded",
     inputs: [
@@ -131,10 +213,18 @@ export const BLOCKSHARE_ABI = [
       { indexed: false, name: "name", type: "string" },
     ],
   },
+  {
+    type: "event",
+    name: "BuildingRequested",
+    inputs: [
+      { indexed: false, name: "requestId", type: "uint256" },
+      { indexed: false, name: "requester", type: "address" },
+    ],
+  },
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Rent ABI (inherits from BlockShare → above ABI also valid against same addr)
+// Rent ABI (separate contract — takes BlockShare address in constructor)
 // ─────────────────────────────────────────────────────────────────────────────
 export const RENT_ABI = [
   {
@@ -190,14 +280,36 @@ export const RENT_ABI = [
     ],
     outputs: [
       { name: "monthlyRent", type: "uint256" },
-      { name: "lastPaid", type: "uint256" },
       { name: "active", type: "bool" },
     ],
+  },
+  {
+    type: "function",
+    name: "rentalSettings",
+    stateMutability: "view",
+    inputs: [
+      { name: "", type: "uint256" },
+      { name: "", type: "uint256" },
+    ],
+    outputs: [
+      { name: "monthlyRent", type: "uint256" },
+      { name: "isActive", type: "bool" },
+    ],
+  },
+  {
+    type: "function",
+    name: "lastPaidTimestamp",
+    stateMutability: "view",
+    inputs: [
+      { name: "", type: "uint256" },
+      { name: "", type: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
   },
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ProposalManager ABI
+// ProposalManager ABI (inherits BlockShare → use proposals address)
 // ─────────────────────────────────────────────────────────────────────────────
 export const PROPOSALS_ABI = [
   {
